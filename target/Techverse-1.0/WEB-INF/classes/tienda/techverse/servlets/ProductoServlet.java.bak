@@ -1,0 +1,63 @@
+package tienda.supernova.servlets;
+
+import tienda.supernova.db.DBConnection;
+
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
+@WebServlet("/producto")
+public class ProductoServlet extends HttpServlet {
+
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        String key = request.getParameter("key");
+        if (key == null || key.isEmpty()) {
+            response.sendRedirect("procesadores.jsp");
+            return;
+        }
+
+        boolean isNumeric = key.matches("\\d+");
+        String sql;
+        if (isNumeric) {
+            sql = "SELECT id, slug, nombre, marca, modelo, precio, ruta_imagen, stock, descripcion FROM productos WHERE id = ? AND activo = 1";
+        } else {
+            sql = "SELECT id, slug, nombre, marca, modelo, precio, ruta_imagen, stock, descripcion FROM productos WHERE slug = ? AND activo = 1";
+        }
+
+        try (Connection con = DBConnection.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
+            if (isNumeric) {
+                ps.setInt(1, Integer.parseInt(key));
+            } else {
+                ps.setString(1, key.toLowerCase());
+            }
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    // Mapear columnas a los atributos que espera producto.jsp
+                    request.setAttribute("name", rs.getString("nombre"));
+                    request.setAttribute("brand", rs.getString("marca"));
+                    request.setAttribute("price", rs.getString("precio"));
+                    request.setAttribute("image", rs.getString("ruta_imagen"));
+                    request.setAttribute("stock", String.valueOf(rs.getInt("stock")));
+                    request.setAttribute("reference", rs.getString("modelo"));
+                    request.setAttribute("desc", rs.getString("descripcion"));
+                    request.setAttribute("id", rs.getInt("id"));
+                    request.getRequestDispatcher("/producto.jsp").forward(request, response);
+                    return;
+                } else {
+                    response.sendRedirect("procesadores.jsp");
+                    return;
+                }
+            }
+        } catch (SQLException e) {
+            throw new ServletException("Error al consultar producto.", e);
+        }
+    }
+}
