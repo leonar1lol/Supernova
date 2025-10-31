@@ -9,14 +9,34 @@
     <meta charset="utf-8" />
     <title>Admin - Usuarios</title>
     <link rel="stylesheet" href="<%= ctx %>/css/style.css" />
-    <link rel="stylesheet" href="<%= ctx %>/css/all.min.css" />
-    <link rel="stylesheet" href="<%= ctx %>/css/admin.css" />
 </head>
 <body>
 <jsp:include page="../header.jsp" />
+<div class="admin-layout">
+    <aside class="admin-sidebar">
+        <div class="brand">
+            <div class="logo">SN</div>
+            <div class="title">SuperNova</div>
+        </div>
+        <nav>
+            <a class="nav-link" href="<%= ctx %>/admin/dashboard">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="3"/></svg>
+                <span>Dashboard</span>
+            </a>
+            <a class="nav-link" href="<%= ctx %>/admin/products">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7h18v4H3zM3 13h18v4H3z"/></svg>
+                <span>Productos</span>
+            </a>
+            <a class="nav-link active" href="<%= ctx %>/admin/users">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3"/><path d="M4 20c0-4 4-6 8-6s8 2 8 6"/></svg>
+                <span>Usuarios</span>
+            </a>
+        </nav>
+    </aside>
 
-<div class="admin-container">
-    <div class="admin-grid">
+    <main class="admin-main">
+        <div class="admin-container">
+            <div class="admin-grid">
         <div class="admin-form users-panel">
             <h2>Usuarios</h2>
         <%
@@ -68,7 +88,7 @@
             </div>
 
             <div class="controls-right save-row" style="margin-top:8px">
-                <button type="submit" class="btn-save"><i class="fas fa-check"></i> Guardar</button>
+                <button type="submit" class="btn-save"> Guardar</button>
                 <% if (editUser != null) { %>
                     <a href="<%= request.getContextPath() %>/admin/users" class="btn-ghost">Cancelar</a>
                 <% } %>
@@ -128,7 +148,6 @@
                                 <input type="hidden" name="action" value="toggleAdmin" />
                                 <input type="hidden" name="id" value="<%= u.get("id") %>" />
                                 <button class="action-btn btn-toggle small-btn" type="submit" title="<%= ("admin".equals(u.get("rol")) || (u.get("is_admin")!=null && (Boolean)u.get("is_admin"))) ? "Desactivar" : "Activar" %>">
-                                    <i class="fas fa-power-off"></i>
                                     <span class="label"><%= ("admin".equals(u.get("rol")) || (u.get("is_admin")!=null && (Boolean)u.get("is_admin"))) ? "Desactivar" : "Activar" %></span>
                                 </button>
                             </form>

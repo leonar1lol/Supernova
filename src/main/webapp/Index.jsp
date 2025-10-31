@@ -10,7 +10,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>supernova - Venta de Componentes de PC</title>
     <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="css/all.min.css">
 </head>
 <body class="index-body">
     <%
@@ -44,11 +43,11 @@
     <jsp:include page="/header.jsp" />
 
     <main>
-        <section class="hero apple-hero">
+    <section class="hero">
             <h1>Potencia tu Creatividad.<br><span class="gradient-text">Arma tu PC Premium</span></h1>
             <p>Componentes de alto rendimiento, diseño minimalista y la mejor experiencia de compra.</p>
-            <div style="display:flex;gap:12px;">
-                <a href="#" class="cta-button apple-cta">Comprar Ahora</a>
+            <div style="display:flex;gap:12px;justify-content:center;">
+                <a href="#" class="cta-button">Comprar Ahora</a>
             </div>
         </section>
 
@@ -64,11 +63,11 @@
             </div>
         </section>
 
-        <section class="promo-banner apple-promo">
+    <section class="promo-banner">
             <div class="promo-content">
                 <h2>¡Nuevo! RTX 4080 GAMING X TRIO</h2>
                 <p>La tarjeta gráfica más avanzada para gamers y creadores. Stock limitado.</p>
-                <a href="#" class="cta-button apple-cta-light">Ver Producto</a>
+                <a href="#" class="cta-button cta-light">Ver Producto</a>
             </div>
         </section>
 
@@ -90,7 +89,7 @@
             </div>
         </section>
 
-        <section class="apple-benefits">
+    <section class="benefits">
             <div class="benefit">
                 <i class="fas fa-shipping-fast"></i>
                 <h3>Envío Express</h3>

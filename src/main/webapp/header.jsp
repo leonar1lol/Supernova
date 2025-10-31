@@ -48,8 +48,12 @@
                 <a href="<%= ctx %>/Login.jsp">Login</a>
             <% } %>
 
-            <a href="#" class="search-icon"><i class="fas fa-search"></i></a>
-            <a href="<%= ctx %>/Cart.jsp" class="cart-icon"><i class="fas fa-shopping-cart"></i></a>
+            <a href="#" class="search-icon" aria-label="Buscar">
+                <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M21 21l-4.35-4.35" stroke="#ddd" stroke-width="2" stroke-linecap="round"/></svg>
+            </a>
+            <a href="<%= ctx %>/Cart.jsp" class="cart-icon" aria-label="Carrito">
+                <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M6 6h15l-1.5 9h-12z" stroke="#ddd" stroke-width="1.2" fill="none" stroke-linejoin="round"/></svg>
+            </a>
         </div>
     </div>
 </header>

@@ -1,4 +1,4 @@
-<footer class="footer apple-footer">
+<footer class="footer">
     <div class="footer-links">
         <a href="#">Términos</a>
         <a href="#">Privacidad</a>

@@ -1,6 +1,0 @@
-tienda\supernova\servlets\LoginServlet.class
-tienda\supernova\filters\AdminFilter.class
-tienda\supernova\servlets\RegistroServlet.class
-tienda\supernova\db\DBConnection.class
-tienda\supernova\servlets\AdminProductServlet.class
-tienda\supernova\servlets\ContactServlet.class

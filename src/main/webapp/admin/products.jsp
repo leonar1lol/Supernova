@@ -15,14 +15,35 @@
     <meta charset="utf-8" />
     <title>Admin - Productos</title>
     <link rel="stylesheet" href="<%= ctx %>/css/style.css" />
-    <link rel="stylesheet" href="<%= ctx %>/css/all.min.css" />
-    <link rel="stylesheet" href="<%= ctx %>/css/admin.css" />
 </head>
 <body>
 <jsp:include page="../header.jsp" />
-<div class="admin-container">
+<div class="admin-layout">
+    <aside class="admin-sidebar">
+        <div class="brand">
+            <div class="logo">SN</div>
+            <div class="title">SuperNova</div>
+        </div>
+        <nav>
+            <a class="nav-link" href="<%= ctx %>/admin/dashboard">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="3"/></svg>
+                <span>Dashboard</span>
+            </a>
+            <a class="nav-link active" href="<%= ctx %>/admin/products">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7h18v4H3zM3 13h18v4H3z"/></svg>
+                <span>Productos</span>
+            </a>
+            <a class="nav-link" href="<%= ctx %>/admin/users">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3"/><path d="M4 20c0-4 4-6 8-6s8 2 8 6"/></svg>
+                <span>Usuarios</span>
+            </a>
+        </nav>
+    </aside>
 
-    <div class="admin-grid">
+    <main class="admin-main">
+        <div class="admin-container">
+
+            <div class="admin-grid">
         <div class="admin-form users-panel">
             <h2><%= (editProduct != null) ? "Editar producto" : "Agregar producto" %></h2>
             <form class="admin-form-inner admin-form" action="<%= ctx %>/admin/products" method="post" enctype="multipart/form-data">
@@ -104,7 +125,7 @@
         </div>
 
         <div class="controls-right save-row" style="margin-top:8px">
-            <button type="submit" class="btn-save"><i class="fas fa-check"></i> <%= (editProduct != null) ? "Actualizar" : "Crear" %></button>
+            <button type="submit" class="btn-save"> <%= (editProduct != null) ? "Actualizar" : "Crear" %></button>
             <% if (editProduct != null) { %>
                 <a href="<%= ctx %>/admin/products" class="btn-ghost">Cancelar</a>
             <% } %>
@@ -165,15 +186,15 @@
                             <input type="hidden" name="action" value="toggle" />
                             <input type="hidden" name="id" value="<%= p.get("id") %>" />
                             <button class="action-btn btn-toggle small-btn" title="<%= (Boolean.TRUE.equals(p.get("activo"))) ? "Desactivar" : "Activar" %>" type="submit">
-                                <i class="fas fa-power-off"></i>
+                                
                                 <span class="label"><%= (Boolean.TRUE.equals(p.get("activo"))) ? "Desactivar" : "Activar" %></span>
                             </button>
                         </form>
-                        <a class="action-btn btn-edit small-btn" title="Editar" href="<%= ctx %>/admin/products?edit=<%= p.get("id") %>"><i class="fas fa-edit"></i> Editar</a>
+                        <a class="action-btn btn-edit small-btn" title="Editar" href="<%= ctx %>/admin/products?edit=<%= p.get("id") %>"> Editar</a>
                         <form action="<%= ctx %>/admin/products" method="post" onsubmit="return confirm('Eliminar?')" style="display:inline-block;">
                             <input type="hidden" name="action" value="delete" />
                             <input type="hidden" name="id" value="<%= p.get("id") %>" />
-                            <button class="action-btn btn-danger small-btn" title="Eliminar" type="submit"><i class="fas fa-trash"></i> Eliminar</button>
+                            <button class="action-btn btn-danger small-btn" title="Eliminar" type="submit"> Eliminar</button>
                         </form>
                     </div>
                 </td>
