@@ -9,26 +9,6 @@
     <title>Gestión de Pedidos</title>
     <link rel="stylesheet" href="<%= ctx %>/css/style.css" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <style>
-        /* pequeños ajustes locales para la tabla de pedidos */
-        .orders-panel { margin-bottom:12px }
-        .filter-group { display:flex; gap:8px; margin:10px 0 16px 0 }
-        .filter-btn { padding:8px 12px; border-radius:8px; border:1px solid #e6e9ee; background:transparent; cursor:pointer }
-        .filter-btn.active { background:#f3f4f6; box-shadow:0 6px 16px rgba(16,24,40,0.04); }
-        /* modal simple embebido */
-        .modal-backdrop{ position:fixed; inset:0; background:rgba(2,6,23,0.6); display:none; align-items:center; justify-content:center; z-index:1200 }
-        .modal{ background:#fff; border-radius:8px; padding:18px; width:420px; max-width:calc(100% - 32px); box-shadow:0 10px 30px rgba(2,6,23,0.3) }
-        .modal h3{ margin:0 0 12px 0 }
-        .modal .form-row{ display:flex; flex-direction:column; gap:6px; margin-bottom:10px }
-        .modal .form-row input{ padding:8px 10px; border:1px solid #e6e9ee; border-radius:6px }
-        .modal .actions{ display:flex; gap:8px; justify-content:flex-end }
-        .modal-show{ display:flex !important }
-        /* toasts in-page (no alert()) */
-        .toast-container{ position:fixed; top:16px; right:16px; z-index:1400; display:flex; flex-direction:column; gap:8px }
-        .toast{ background:#222; color:#fff; padding:10px 14px; border-radius:8px; box-shadow:0 6px 18px rgba(2,6,23,0.3); opacity:0.98; min-width:180px }
-        .toast.success{ background:#0b8f3b }
-        .toast.error{ background:#c02828 }
-    </style>
 </head>
 <body>
 <jsp:include page="../header.jsp" />
@@ -65,13 +45,11 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <!-- filas cargadas desde /admin/api/orders -->
                         </tbody>
                     </table>
                 </div>
             </div>
 
-            <!-- Modal embebido para crear nuevo pedido -->
             <div id="newOrderModal" class="modal-backdrop" aria-hidden="true">
                 <div class="modal" role="dialog" aria-modal="true" aria-labelledby="moTitle">
                     <h3 id="moTitle">Crear Nuevo Pedido</h3>
@@ -90,7 +68,6 @@
                 </div>
             </div>
 
-            <!-- Modal para editar pedido -->
             <div id="editOrderModal" class="modal-backdrop" aria-hidden="true">
                 <div class="modal" role="dialog" aria-modal="true" aria-labelledby="editTitle">
                     <h3 id="editTitle">Editar Pedido</h3>
@@ -117,7 +94,6 @@
                 </div>
             </div>
 
-            <!-- Modal para ver/añadir items de un pedido -->
             <div id="itemsModal" class="modal-backdrop" aria-hidden="true">
                 <div class="modal" role="dialog" aria-modal="true" aria-labelledby="itemsTitle">
                     <h3 id="itemsTitle">Items del Pedido <span id="itemsOrderId"></span></h3>
@@ -144,10 +120,8 @@
                 </div>
             </div>
 
-            <!-- contenedor para toasts (notificaciones en-page) -->
             <div id="toastContainer" class="toast-container" aria-live="polite"></div>
 
-            <!-- Modal de confirmación para eliminar pedido -->
             <div id="deleteModal" class="modal-backdrop" aria-hidden="true">
                 <div class="modal" role="dialog" aria-modal="true" aria-labelledby="delTitle">
                     <h3 id="delTitle">Eliminar pedido</h3>
@@ -165,7 +139,6 @@
 
     <script>window.APP_CTX = '<%= ctx %>';</script>
     <script>
-        // helper: show in-page toast instead of alert()
         function showToast(msg, kind){
             try{
                 var container = document.getElementById('toastContainer'); if(!container) return; var d = document.createElement('div'); d.className = 'toast '+(kind||''); d.textContent = msg; container.appendChild(d);
@@ -216,7 +189,6 @@
                 var search = document.getElementById('orderSearch');
                 $all('.filter-btn').forEach(function(btn){ btn.addEventListener('click', function(){ applyFilter(btn.getAttribute('data-state')); }); });
 
-                // New order -> abrir modal embebido en lugar de prompt()
                 var btnNew = document.getElementById('btnNewOrder');
                 var modal = document.getElementById('newOrderModal');
                 var moEmail = document.getElementById('moEmail');
@@ -229,7 +201,6 @@
                 function escHandler(e){ if(e.key === 'Escape'){ closeModal(); } }
 
                 if (modal){
-                    // cerrar al hacer click fuera del dialog
                     modal.addEventListener('click', function(e){ if (e.target === modal) closeModal(); });
                 }
 
@@ -241,20 +212,16 @@
                     var email = (moEmail && moEmail.value||'').trim();
                     if (!email){ showToast('Ingrese un email válido','error'); if(moEmail) moEmail.focus(); return; }
                     var nombre = (moNombre && moNombre.value||'').trim();
-                    // use urlencoded body so servlet can read parameters via getParameter()
                     var params = new URLSearchParams(); params.append('action','create'); params.append('cliente_email', email); if (nombre) params.append('cliente_nombre', nombre);
 
-                    // feedback UI
                     moSubmit.disabled = true; moSubmit.textContent = 'Creando...';
 
                     fetch(window.APP_CTX + '/admin/api/orders', {method:'POST', headers: {'Content-Type':'application/x-www-form-urlencoded; charset=UTF-8'}, body: params.toString()}).then(function(resp){
-                        // mostrar detalle si el servidor devuelve error HTTP
                         if (!resp.ok){ return resp.text().then(function(t){ throw new Error('HTTP '+resp.status+': '+(t||resp.statusText)); }); }
                         return resp.json().catch(function(){ throw new Error('Respuesta no JSON desde el servidor'); });
                     }).then(function(res){
                         if(res && res.ok){ closeModal(); showToast('Pedido creado ID='+res.id,'success'); load(); }
                         else {
-                            // si la API devuelve {ok:false, message:'...'} mostrarlo
                             var msg = (res && (res.message || JSON.stringify(res))) || 'Error al crear pedido';
                             throw new Error(msg);
                         }
@@ -266,12 +233,10 @@
 
                 search.addEventListener('input', function(){ var q = this.value.toLowerCase(); $all('#ordersTable tbody tr').forEach(function(tr){ var id = tr.children[0].textContent.toLowerCase(); var client = tr.children[1].textContent.toLowerCase(); var total = tr.children[3].textContent.toLowerCase(); var visible = id.indexOf(q)!==-1 || client.indexOf(q)!==-1 || total.indexOf(q)!==-1; tr.style.display = visible ? '' : 'none'; }); });
 
-                // actions delegation
                 document.querySelector('#ordersTable tbody').addEventListener('click', function(e){
                     var btn = e.target.closest('button[data-action]'); if(!btn) return;
                     var act = btn.getAttribute('data-action'); var id = btn.getAttribute('data-id');
                     if (act === 'delete'){
-                        // abrir modal de confirmación en lugar de confirm() nativo
                         var deleteModal = document.getElementById('deleteModal');
                         var delText = document.getElementById('delText');
                         var delCancel = document.getElementById('delCancel');
@@ -286,20 +251,16 @@
                             fetch(window.APP_CTX + '/admin/api/orders', {method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded; charset=UTF-8'}, body: p.toString()}).then(function(r){ return r.json(); }).then(function(res){ if(res && res.ok){ closeDel(); showToast('Eliminado','success'); load(); } else { closeDel(); showToast('Error al eliminar: '+(res && res.error?res.error:JSON.stringify(res)),'error'); } }).catch(function(e){ console.error('delete error',e); showToast('Error al eliminar','error'); closeDel(); });
                         };
                     } else if (act === 'edit'){
-                        // Abrir modal de editar pedido (sin prompt de navegador)
                         var editModal = document.getElementById('editOrderModal');
                         var moEditEstado = document.getElementById('moEditEstado');
                         var moEditPrioridad = document.getElementById('moEditPrioridad');
                         var moEditClienteEmail = document.getElementById('moEditClienteEmail');
                         var moEditCancel = document.getElementById('moEditCancel');
                         var moEditSubmit = document.getElementById('moEditSubmit');
-                        // prefills
                         try { var tr = btn.closest('tr'); var currentEstado = tr.children[2].textContent.trim().toLowerCase(); moEditEstado.value = currentEstado==='en preparación' ? 'preparacion' : currentEstado; } catch(e){}
                         moEditPrioridad.value = '';
                         moEditClienteEmail.value = '';
-                        // open
                         editModal.classList.add('modal-show'); editModal.setAttribute('aria-hidden','false');
-                        // handlers
                         function closeEdit(){ editModal.classList.remove('modal-show'); editModal.setAttribute('aria-hidden','true'); moEditSubmit.disabled=false; moEditSubmit.textContent='Guardar'; }
                         if (moEditCancel) moEditCancel.onclick = function(ev){ ev.preventDefault(); closeEdit(); };
                         if (moEditSubmit) {
@@ -309,7 +270,6 @@
                                 fetch(window.APP_CTX + '/admin/api/orders', {method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded; charset=UTF-8'}, body: p.toString()}).then(function(r){ return r.json(); }).then(function(res){ if(res && res.ok){ closeEdit(); alert('Actualizado'); load(); } else { alert('Error al actualizar: '+(res && res.error?res.error:JSON.stringify(res))); } }).catch(function(e){ console.error('update error',e); alert('Error al actualizar'); }).finally(function(){ moEditSubmit.disabled=false; moEditSubmit.textContent='Guardar'; }); };
                         }
                     } else if (act === 'items'){
-                        // abrir modal de items
                         var itemsModal = document.getElementById('itemsModal');
                         var itemsList = document.getElementById('itemsList');
                         var itemsOrderId = document.getElementById('itemsOrderId');

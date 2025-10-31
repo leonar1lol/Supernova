@@ -12,13 +12,17 @@ public class AdminUserServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        // Serve the JSP. The page will call /admin/api/users for data/actions.
+    jakarta.servlet.http.HttpSession s = req.getSession(false);
+        String role = s != null ? (String) s.getAttribute("role") : null;
+        if (role == null || !(role.equalsIgnoreCase("admin") || role.equalsIgnoreCase("supervisor"))) {
+            resp.sendRedirect(req.getContextPath() + "/admin/dashboard");
+            return;
+        }
         req.getRequestDispatcher("/admin/users.jsp").forward(req, resp);
     }
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        // State-changing operations must go through the API.
         resp.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED, "Use /admin/api/users for actions");
     }
 

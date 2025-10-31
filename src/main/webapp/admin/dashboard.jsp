@@ -47,30 +47,19 @@
 
     <div class="actions-grid">
         <a class="action-card" href="<%= ctx %>/admin/products"><div style="width:42px;height:42px;border-radius:8px;background:#f9a825;margin-right:10px"></div><div>Gestionar Productos</div></a>
+        <% 
+            jakarta.servlet.http.HttpSession _s = request.getSession(false);
+            String _role = _s != null ? (String) _s.getAttribute("role") : null;
+            if (_role != null && (_role.equalsIgnoreCase("admin") || _role.equalsIgnoreCase("supervisor"))) {
+        %>
         <a class="action-card" href="<%= ctx %>/admin/users"><div style="width:42px;height:42px;border-radius:8px;background:#1976d2;margin-right:10px"></div><div>Gestionar Usuarios</div></a>
+        <% } %>
     </div>
-            <div class="chart-panel panel">
-                <div class="chart-header">
-                    <h3>Ventas por Categoría</h3>
-                    <div class="chart-controls">
-                        <select class="sort-select">
-                            <option>Últimos 7 días</option>
-                            <option>Últimos 30 días</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="chart-placeholder">
-                    <div class="chart-canvas-wrapper">
-                        <canvas id="dashboardChart" class="chart-canvas" role="img" aria-label="Gráfico de ventas por categoría"></canvas>
-                    </div>
-                </div>
-            </div>
         </div>
     </main>
 
 </div>
 
 <script>window.APP_CTX = '<%= ctx %>';</script>
-<script src="<%= ctx %>/js/dashboard-chart.js"></script>
 </body>
 </html>

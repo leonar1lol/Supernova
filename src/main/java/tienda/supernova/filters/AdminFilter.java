@@ -15,10 +15,30 @@ public class AdminFilter implements Filter {
         HttpServletRequest req = (HttpServletRequest) request;
         HttpServletResponse res = (HttpServletResponse) response;
         HttpSession session = req.getSession(false);
-        if (session != null && "admin".equals(session.getAttribute("role"))) {
-            chain.doFilter(request, response);
-        } else {
-            res.sendRedirect(req.getContextPath() + "/Login.jsp?admin=required");
+        String ctx = req.getContextPath();
+        String uri = req.getRequestURI();
+        String role = session != null ? (String) session.getAttribute("role") : null;
+
+        if (session == null || role == null) {
+            res.sendRedirect(ctx + "/Login.jsp?admin=required");
+            return;
         }
+
+        if ("admin".equalsIgnoreCase(role) || "supervisor".equalsIgnoreCase(role)) {
+            chain.doFilter(request, response);
+            return;
+        }
+
+        if ("operario".equalsIgnoreCase(role) || "user".equalsIgnoreCase(role)) {
+            if (uri.startsWith(ctx + "/admin/dashboard") || uri.startsWith(ctx + "/admin/orders") || uri.startsWith(ctx + "/admin/route-optimization") || uri.startsWith(ctx + "/admin/product-validation") || uri.startsWith(ctx + "/admin/notifications") || uri.startsWith(ctx + "/admin/products") || uri.startsWith(ctx + "/admin/api/orders")) {
+                chain.doFilter(request, response);
+                return;
+            } else {
+                res.sendRedirect(ctx + "/admin/dashboard");
+                return;
+            }
+        }
+
+        res.sendRedirect(ctx + "/Login.jsp?admin=required");
     }
 }

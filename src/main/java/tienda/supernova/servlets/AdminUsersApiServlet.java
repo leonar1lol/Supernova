@@ -17,25 +17,63 @@ public class AdminUsersApiServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        jakarta.servlet.http.HttpSession s = req.getSession(false);
+        String role = s != null ? (String) s.getAttribute("role") : null;
+        if (role == null || !(role.equalsIgnoreCase("admin") || role.equalsIgnoreCase("supervisor"))) {
+            resp.setStatus(HttpServletResponse.SC_FORBIDDEN);
+            resp.setContentType("application/json;charset=UTF-8");
+            resp.getWriter().print("{\"error\":\"forbidden\"}");
+            return;
+        }
         resp.setContentType("application/json;charset=UTF-8");
-        String sql = "SELECT id_usuario AS id, nombre_usuario AS nombre, rol, email FROM Usuario";
+        String sqlWithActivo = "SELECT id_usuario AS id, nombre_usuario AS nombre, rol, email, activo FROM Usuario";
+        String sqlWithoutActivo = "SELECT id_usuario AS id, nombre_usuario AS nombre, rol, email FROM Usuario";
         StringBuilder sb = new StringBuilder();
         sb.append('[');
         boolean first = true;
-        try (Connection conn = DBConnection.getConnection(); PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
-            while (rs.next()) {
-                if (!first) sb.append(',');
-                first = false;
-                int id = rs.getInt("id");
-                String nombre = rs.getString("nombre");
-                String rol = rs.getString("rol");
-                String email = rs.getString("email");
-                sb.append('{');
-                sb.append("\"id\":").append(id).append(',');
-                sb.append("\"nombre\":\"").append(escape(nombre)).append("\",");
-                sb.append("\"rol\":\"").append(escape(rol)).append("\",");
-                sb.append("\"email\":\"").append(escape(email)).append("\"");
-                sb.append('}');
+        try (Connection conn = DBConnection.getConnection()) {
+            try (PreparedStatement ps = conn.prepareStatement(sqlWithActivo); ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    if (!first) sb.append(',');
+                    first = false;
+                    int id = rs.getInt("id");
+                    String nombre = rs.getString("nombre");
+                    String rol = rs.getString("rol");
+                    String email = rs.getString("email");
+                    boolean activo = false;
+                    try { activo = rs.getBoolean("activo"); } catch (Exception x) { activo = false; }
+                    sb.append('{');
+                    sb.append("\"id\":").append(id).append(',');
+                    sb.append("\"nombre\":\"").append(escape(nombre)).append("\",");
+                    sb.append("\"rol\":\"").append(escape(rol)).append("\",");
+                    sb.append("\"email\":\"").append(escape(email)).append("\",");
+                    sb.append("\"activo\":").append(activo ? "true" : "false");
+                    sb.append('}');
+                }
+            } catch (SQLException ex) {
+                String msg = ex.getMessage() == null ? "" : ex.getMessage().toLowerCase();
+                if (msg.contains("activo") || msg.contains("unknown column") || msg.contains("column") ) {
+                    try (PreparedStatement ps2 = conn.prepareStatement(sqlWithoutActivo); ResultSet rs2 = ps2.executeQuery()) {
+                        while (rs2.next()) {
+                            if (!first) sb.append(',');
+                            first = false;
+                            int id = rs2.getInt("id");
+                            String nombre = rs2.getString("nombre");
+                            String rol = rs2.getString("rol");
+                            String email = rs2.getString("email");
+                            boolean activo = false;
+                            sb.append('{');
+                            sb.append("\"id\":").append(id).append(',');
+                            sb.append("\"nombre\":\"").append(escape(nombre)).append("\",");
+                            sb.append("\"rol\":\"").append(escape(rol)).append("\",");
+                            sb.append("\"email\":\"").append(escape(email)).append("\",");
+                            sb.append("\"activo\":").append(activo ? "true" : "false");
+                            sb.append('}');
+                        }
+                    }
+                } else {
+                    throw ex;
+                }
             }
         } catch (SQLException e) {
             resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
@@ -48,7 +86,14 @@ public class AdminUsersApiServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        // actions: create, delete, toggleAdmin, update
+        jakarta.servlet.http.HttpSession s = req.getSession(false);
+        String role = s != null ? (String) s.getAttribute("role") : null;
+        if (role == null || !(role.equalsIgnoreCase("admin") || role.equalsIgnoreCase("supervisor"))) {
+            resp.setStatus(HttpServletResponse.SC_FORBIDDEN);
+            resp.setContentType("application/json;charset=UTF-8");
+            resp.getWriter().print("{\"error\":\"forbidden\"}");
+            return;
+        }
         String action = req.getParameter("action");
         resp.setContentType("application/json;charset=UTF-8");
         if (action == null) {
@@ -85,7 +130,6 @@ public class AdminUsersApiServlet extends HttpServlet {
                 }
             }
 
-            // For actions that require an id param
             String idParam = req.getParameter("id");
             if (idParam == null) {
                 resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -103,7 +147,6 @@ public class AdminUsersApiServlet extends HttpServlet {
                 resp.getWriter().print("{\"ok\":true}");
                 return;
             } else if ("toggleAdmin".equals(action)) {
-                // read current role
                 String cur = null;
                 try (PreparedStatement ps = conn.prepareStatement("SELECT rol FROM Usuario WHERE id_usuario = ?")) {
                     ps.setInt(1, id);
@@ -117,8 +160,29 @@ public class AdminUsersApiServlet extends HttpServlet {
                 }
                 resp.getWriter().print("{\"ok\":true,\"role\":\""+escape(next)+"\"}");
                 return;
+            } else if ("toggleActive".equals(action) || "toggleActivo".equals(action)) {
+                try {
+                    try (PreparedStatement ps = conn.prepareStatement("UPDATE Usuario SET activo = NOT activo WHERE id_usuario = ?")) {
+                        ps.setInt(1, id);
+                        ps.executeUpdate();
+                    }
+                    boolean newActivo = false;
+                    try (PreparedStatement ps2 = conn.prepareStatement("SELECT activo FROM Usuario WHERE id_usuario = ?")){
+                        ps2.setInt(1, id);
+                        try (ResultSet rs = ps2.executeQuery()){ if (rs.next()) newActivo = rs.getBoolean("activo"); }
+                    }
+                    resp.getWriter().print("{\"ok\":true,\"activo\":" + (newActivo?"true":"false") + "}");
+                    return;
+                } catch (SQLException ex) {
+                    String msg = ex.getMessage() == null ? "" : ex.getMessage().toLowerCase();
+                    if (msg.contains("activo") || msg.contains("unknown column") || msg.contains("column")) {
+                        resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                        resp.getWriter().print("{\"ok\":false,\"error\":\"no_activo_column\"}");
+                        return;
+                    }
+                    throw ex;
+                }
             } else if ("update".equals(action)) {
-                // update user fields: nombre, email, rol, password (optional)
                 String nombre = req.getParameter("nombre");
                 String email = req.getParameter("email");
                 String rol = req.getParameter("rol");

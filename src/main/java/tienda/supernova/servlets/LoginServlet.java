@@ -36,6 +36,56 @@ public class LoginServlet extends HttpServlet {
             ResultSet rs = ps.executeQuery();
 
             if (rs.next()) {
+                boolean blocked = false;
+                try {
+                    java.sql.ResultSetMetaData mdCheck = rs.getMetaData();
+                    int colsCheck = mdCheck.getColumnCount();
+                    for (int i = 1; i <= colsCheck; i++) {
+                        String colCheck = mdCheck.getColumnLabel(i);
+                        if (colCheck != null && (colCheck.equalsIgnoreCase("activo") || colCheck.equalsIgnoreCase("is_active") || colCheck.equalsIgnoreCase("active"))) {
+                            try {
+                                boolean isActive = rs.getBoolean(colCheck);
+                                if (!isActive) {
+                                    HttpSession ses = request.getSession();
+                                    ses.setAttribute("loginError","inactive");
+                                    response.sendRedirect("Login.jsp");
+                                    return;
+                                }
+                            } catch (Exception ignore) { }
+                            blocked = true;
+                            break;
+                        }
+                    }
+                } catch (Exception ignore) { }
+
+                if (!blocked) {
+                    try (PreparedStatement psCheck = con.prepareStatement("SELECT activo FROM Usuario WHERE email = ?")) {
+                        psCheck.setString(1, email);
+                        try (ResultSet rsCheck = psCheck.executeQuery()) {
+                            if (rsCheck.next()) {
+                                try { 
+                                    if (!rsCheck.getBoolean("activo")) { 
+                                        HttpSession ses = request.getSession(); 
+                                        ses.setAttribute("loginError","inactive"); 
+                                        response.sendRedirect("Login.jsp"); 
+                                        return; 
+                                    } 
+                                } catch (Exception ignore) {}
+                                blocked = true;
+                            }
+                        }
+                    } catch (SQLException ignore) {
+                        try (PreparedStatement psCheck2 = con.prepareStatement("SELECT activo FROM usuarios WHERE email = ?")) {
+                            psCheck2.setString(1, email);
+                            try (ResultSet rsCheck2 = psCheck2.executeQuery()) {
+                                if (rsCheck2.next()) {
+                                    try { if (!rsCheck2.getBoolean("activo")) { response.sendRedirect("Login.jsp?error=inactive"); return; } } catch (Exception ignore2) {}
+                                    blocked = true;
+                                }
+                            }
+                        } catch (SQLException ignore2) {  }
+                    }
+                }
                 HttpSession session = request.getSession();
                 session.setAttribute("username", rs.getString("nombre"));
 
@@ -67,12 +117,7 @@ public class LoginServlet extends HttpServlet {
                 }
 
                 session.setAttribute("role", role);
-                if ("admin".equals(role)) {
-
-                    response.sendRedirect(request.getContextPath() + "/admin/dashboard");
-                } else {
-                    response.sendRedirect("Index.jsp");
-                }
+                response.sendRedirect(request.getContextPath() + "/admin/dashboard");
             } else {
                 response.sendRedirect("Login.jsp?error=1");
             }

@@ -19,7 +19,6 @@ public class AdminOrdersApiServlet extends HttpServlet {
         resp.setContentType("application/json; charset=utf-8");
         resp.setCharacterEncoding("utf-8");
         try (Connection con = DBConnection.getConnection()) {
-            // if order id specified, return order items
             String orderIdParam = req.getParameter("id");
             if (orderIdParam == null) orderIdParam = req.getParameter("orderId");
             if (orderIdParam != null && !orderIdParam.isEmpty()){
@@ -53,7 +52,6 @@ public class AdminOrdersApiServlet extends HttpServlet {
             boolean hasPrecioUnitario = false;
             boolean hasPrecioProducto = false;
 
-            // inspect columns to decide how to compute total
             try (PreparedStatement p = con.prepareStatement("SELECT * FROM Detalle_Pedido LIMIT 1")) {
                 try (ResultSet r = p.executeQuery()) {
                     ResultSetMetaData md = r.getMetaData();
@@ -65,7 +63,6 @@ public class AdminOrdersApiServlet extends HttpServlet {
                     }
                 }
             } catch (SQLException ignore) {
-                // table may exist but empty; ignore
             }
 
             try (PreparedStatement p2 = con.prepareStatement("SELECT * FROM Producto LIMIT 1")) {
@@ -119,7 +116,6 @@ public class AdminOrdersApiServlet extends HttpServlet {
                     sb.append("\"cliente\":").append(quote(cliente)).append(',');
                     sb.append("\"estado\":").append(quote(estado)).append(',');
                     sb.append("\"fecha\":").append(quote(fecha)).append(',');
-                    // total as number (no quotes)
                     if (total == null) sb.append("\"total\":0"); else sb.append("\"total\":").append(total);
                     sb.append(',');
                     sb.append("\"totalIsItems\":").append(totalIsItems);
@@ -142,7 +138,6 @@ public class AdminOrdersApiServlet extends HttpServlet {
             String action = req.getParameter("action");
             if (action == null) action = "";
 
-            // helper to check column presence (use hasColumn method below)
 
             if ("create".equalsIgnoreCase(action)) {
                 String clienteEmail = req.getParameter("cliente_email");
@@ -181,7 +176,6 @@ public class AdminOrdersApiServlet extends HttpServlet {
                 if (prioridad != null) { sb.append("prioridad = ?, "); params.add(prioridad); }
                 if (idCliente != null) { sb.append("id_cliente = ?, "); params.add(idCliente); }
                 if (params.isEmpty()) { resp.getWriter().write("{\"ok\":false,\"error\":\"nothing to update\"}"); return; }
-                // remove trailing comma
                 int last = sb.lastIndexOf(","); if (last!=-1) sb.deleteCharAt(last);
                 sb.append(" WHERE id_pedido = ?");
                 try (PreparedStatement ps = con.prepareStatement(sb.toString())){
@@ -255,7 +249,6 @@ public class AdminOrdersApiServlet extends HttpServlet {
                 ps.setString(1, email);
                 try (ResultSet rs = ps.executeQuery()){ if (rs.next()) return rs.getInt(1); }
             }
-            // create if name provided or create with email only
             try (PreparedStatement ins = con.prepareStatement("INSERT INTO Cliente (nombre, email) VALUES (?,?)", Statement.RETURN_GENERATED_KEYS)){
                 ins.setString(1, nombre != null && !nombre.isEmpty() ? nombre : email);
                 ins.setString(2, email);

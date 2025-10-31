@@ -2,6 +2,15 @@
 <%
     String ctx = request.getContextPath();
 %>
+<%
+    // Prevent non-admin/supervisor from accessing this page directly
+    jakarta.servlet.http.HttpSession _s = request.getSession(false);
+    String _role = _s != null ? (String) _s.getAttribute("role") : null;
+    if (_role == null || !(_role.equalsIgnoreCase("admin") || _role.equalsIgnoreCase("supervisor"))) {
+        response.sendRedirect(ctx + "/admin/dashboard");
+        return;
+    }
+%>
 <!doctype html>
 <html>
 <head>
@@ -41,11 +50,11 @@
                                 <th>Nombre</th>
                                 <th>Email</th>
                                 <th>Rol</th>
+                                <th>Activo</th>
                                 <th class="text-center">Acciones</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <!-- rows cargadas vía JS -->
                         </tbody>
                     </table>
                 </div>
@@ -54,7 +63,6 @@
     </main>
 
     <script>window.APP_CTX = '<%= ctx %>';</script>
-    <!-- Edit user modal -->
     <div id="editUserModal" class="modal-backdrop" style="display:none;align-items:center;justify-content:center;z-index:1200">
         <div class="modal" role="dialog" aria-modal="true" style="width:420px;max-width:calc(100% - 32px);">
             <h3>Editar Usuario</h3>
@@ -72,7 +80,6 @@
                     <option value="admin">Administrador</option>
                     <option value="operario">Operario</option>
                     <option value="supervisor">Supervisor</option>
-                    <option value="cliente">Cliente</option>
                 </select>
             </div>
             <div class="form-row">
@@ -85,7 +92,6 @@
             </div>
         </div>
     </div>
-    <!-- Create user modal -->
     <div id="createUserModal" class="modal-backdrop" style="display:none;align-items:center;justify-content:center;z-index:1200">
         <div class="modal" role="dialog" aria-modal="true" style="width:420px;max-width:calc(100% - 32px);">
             <h3>Nuevo Usuario</h3>
@@ -103,7 +109,6 @@
                     <option value="admin">Administrador</option>
                     <option value="operario">Operario</option>
                     <option value="supervisor">Supervisor</option>
-                    <option value="cliente">Cliente</option>
                 </select>
             </div>
             <div class="form-row">

@@ -1,5 +1,5 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%
     session.invalidate();
-    response.sendRedirect("Index.jsp");
+    response.sendRedirect("Login.jsp");
 %>
