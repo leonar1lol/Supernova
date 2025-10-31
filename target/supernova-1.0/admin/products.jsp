@@ -19,26 +19,7 @@
 <body>
 <jsp:include page="../header.jsp" />
 <div class="admin-layout">
-    <aside class="admin-sidebar">
-        <div class="brand">
-            <div class="logo">SN</div>
-            <div class="title">SuperNova</div>
-        </div>
-        <nav>
-            <a class="nav-link" href="<%= ctx %>/admin/dashboard">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="3"/></svg>
-                <span>Dashboard</span>
-            </a>
-            <a class="nav-link active" href="<%= ctx %>/admin/products">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7h18v4H3zM3 13h18v4H3z"/></svg>
-                <span>Productos</span>
-            </a>
-            <a class="nav-link" href="<%= ctx %>/admin/users">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3"/><path d="M4 20c0-4 4-6 8-6s8 2 8 6"/></svg>
-                <span>Usuarios</span>
-            </a>
-        </nav>
-    </aside>
+    <jsp:include page="../includes/admin-sidebar.jsp" />
 
     <main class="admin-main">
         <div class="admin-container">

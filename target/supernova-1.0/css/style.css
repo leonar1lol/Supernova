@@ -49,7 +49,42 @@ body { font-family: system-ui, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans
 /* Admin basics */
 .admin-container { padding:18px; font-size:0.95rem; }
 .admin-table { width:100%; border-collapse:collapse; }
-.admin-table th, .admin-table td { padding:8px 10px; border-bottom:1px solid #eef2f7; }
+.admin-table th, .admin-table td { padding:12px 14px; border-bottom:1px solid #eef2f7; }
+
+/* Users table panel */
+.admin-table.table-scroll { background:var(--panel-bg); border-radius:12px; padding:14px; box-shadow:0 8px 24px rgba(15,23,42,0.04); }
+.admin-table table { width:100%; border-collapse:collapse; }
+.admin-table thead th { text-align:left; font-size:0.9rem; color:#374151; padding:12px 10px; border-bottom:2px solid #eef2f7; background:transparent; }
+.admin-table tbody tr:hover { background:linear-gradient(90deg, rgba(124,58,237,0.03), rgba(0,0,0,0)); }
+.admin-table tbody td { vertical-align:middle; color:#111; }
+.admin-table tbody td.text-center { text-align:center; }
+
+/* Table small utilities */
+.muted { color:var(--muted); }
+.text-center { text-align:center; }
+
+/* Action buttons */
+.action-forms{ display:flex; gap:8px; justify-content:flex-end; align-items:center; }
+.action-btn{ display:inline-flex; gap:8px; align-items:center; padding:6px 10px; border-radius:8px; border:1px solid transparent; cursor:pointer; font-size:0.9rem; }
+.action-btn svg{ width:14px; height:14px; display:block; }
+.btn-edit{ background:transparent; color:#111; border:1px solid #e6e9ee; }
+.btn-edit:hover{ background:rgba(124,58,237,0.06); border-color:rgba(124,58,237,0.12); }
+.btn-danger{ background:#ef4444; color:#fff; border:0; }
+.btn-danger:hover{ filter:brightness(.95); }
+.btn-toggle{ background:#10b981; color:#fff; border:0; }
+.small-btn{ padding:6px 8px; font-size:0.85rem; border-radius:8px; }
+
+/* Icon-only variant */
+.btn-icon{ padding:8px; width:36px; height:36px; display:inline-grid; place-items:center; border-radius:8px; }
+
+/* Responsive tweaks for table */
+@media (max-width:800px){
+   .admin-table thead { display:none; }
+   .admin-table table, .admin-table tbody, .admin-table tr, .admin-table td { display:block; width:100%; }
+   .admin-table tr { margin-bottom:12px; border-radius:10px; background:var(--panel-bg); padding:10px; box-shadow:0 6px 18px rgba(15,23,42,0.03); }
+   .admin-table td { display:flex; justify-content:space-between; padding:8px 10px; border-bottom:0; }
+   .admin-table td::before { content:attr(data-label); color:var(--muted); font-weight:600; margin-right:8px; }
+}
 
 /* Admin layout: sidebar + main */
 .admin-layout { display:flex; gap:20px; min-height:calc(100vh - 60px); }

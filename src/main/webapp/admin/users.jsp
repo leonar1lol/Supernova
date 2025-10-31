@@ -1,5 +1,4 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<%@ page import="java.util.List,java.util.Map" %>
 <%
     String ctx = request.getContextPath();
 %>
@@ -9,195 +8,115 @@
     <meta charset="utf-8" />
     <title>Admin - Usuarios</title>
     <link rel="stylesheet" href="<%= ctx %>/css/style.css" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
 </head>
 <body>
 <jsp:include page="../header.jsp" />
 <div class="admin-layout">
-    <aside class="admin-sidebar">
-        <div class="brand">
-            <div class="logo">SN</div>
-            <div class="title">SuperNova</div>
-        </div>
-        <nav>
-            <a class="nav-link" href="<%= ctx %>/admin/dashboard">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="3"/></svg>
-                <span>Dashboard</span>
-            </a>
-            <a class="nav-link" href="<%= ctx %>/admin/products">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7h18v4H3zM3 13h18v4H3z"/></svg>
-                <span>Productos</span>
-            </a>
-            <a class="nav-link active" href="<%= ctx %>/admin/users">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3"/><path d="M4 20c0-4 4-6 8-6s8 2 8 6"/></svg>
-                <span>Usuarios</span>
-            </a>
-        </nav>
-    </aside>
+    <jsp:include page="../includes/admin-sidebar.jsp" />
 
     <main class="admin-main">
         <div class="admin-container">
             <div class="admin-grid">
-        <div class="admin-form users-panel">
-            <h2>Usuarios</h2>
-        <%
-            String error = request.getParameter("error");
-            if ("email_exists".equals(error)) {
-        %>
-            <div style="color:#b71c1c;background:#ffebee;padding:8px;border-radius:4px;margin-bottom:8px;">El email ya está registrado por otro usuario.</div>
-        <% } %>
-        <%
-            Map<String,Object> editUser = (Map<String,Object>) request.getAttribute("editUser");
-            String formAction = "create";
-            if (editUser != null) formAction = "update";
-        %>
-        <form method="post" action="<%= request.getContextPath() %>/admin/users" class="admin-form-inner admin-form">
-            <input type="hidden" name="action" value="<%= formAction %>" />
-            <input type="hidden" name="id" value="<%= editUser!=null?editUser.get("id"):"" %>" />
-            <div class="form-grid">
-                <div>
-                    <label class="small">Nombre</label>
-                    <input type="text" name="nombre" value="<%= editUser!=null?editUser.get("nombre") : "" %>" required />
-                </div>
-                <div>
-                    <label class="small">Apellidos</label>
-                    <input type="text" name="apellidos" value="<%= editUser!=null?editUser.get("apellidos") : "" %>" />
+                <div class="admin-form users-panel">
+                    <h2>Usuarios</h2>
+                    <p class="muted">Listado de usuarios cargado desde la base de datos (local).</p>
+                    <div style="margin-top:12px">
+                        <input id="userSearch" class="search-input" placeholder="Buscar usuarios (nombre, email)" />
+                    </div>
                 </div>
 
-                <div class="full-width">
-                    <label class="small">Email</label>
-                    <input type="email" name="email" value="<%= editUser!=null?editUser.get("email") : "" %>" required />
-                </div>
+                <div class="admin-table table-scroll">
+                    <div style="display:flex;justify-content:space-between;align-items:center;gap:12px">
+                        <h2 style="margin:0">Lista de usuarios</h2>
+                        <div>
+                            <button id="btnNewUser" class="btn-primary" style="margin-left:8px">Nuevo Usuario</button>
+                        </div>
+                    </div>
 
-                <div>
-                    <label class="small">Contraseña <small>(dejar vacío para mantener)</small></label>
-                    <input type="password" name="password" />
+                    <table id="usersTable" class="admin-table" style="margin-top:12px">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nombre</th>
+                                <th>Email</th>
+                                <th>Rol</th>
+                                <th class="text-center">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- rows cargadas vía JS -->
+                        </tbody>
+                    </table>
                 </div>
-                <div>
-                    <label class="small">Fecha de nacimiento</label>
-                    <input type="date" name="fecha_nacimiento" value="<%= editUser!=null?editUser.get("fecha_nacimiento") : "" %>" />
-                </div>
-
-                <div class="full-width">
-                    <label class="small">Rol</label>
-                    <select name="rol" class="sort-select">
-                        <option value="user" <%= (editUser!=null && "admin".equals(editUser.get("rol")))?"":"selected" %>>user</option>
-                        <option value="admin" <%= (editUser!=null && "admin".equals(editUser.get("rol")))?"selected":"" %>>admin</option>
-                    </select>
-                </div>
-
-            </div>
-
-            <div class="controls-right save-row" style="margin-top:8px">
-                <button type="submit" class="btn-save"> Guardar</button>
-                <% if (editUser != null) { %>
-                    <a href="<%= request.getContextPath() %>/admin/users" class="btn-ghost">Cancelar</a>
-                <% } %>
-            </div>
-        </form>
-    </div>
-    <div class="admin-table table-scroll">
-        <div style="display:flex;justify-content:space-between;align-items:center;gap:12px">
-            <h2 style="margin:0">Lista de usuarios</h2>
-            <div style="display:flex;gap:8px;align-items:center">
-                <input id="userSearch" class="search-input" placeholder="Buscar usuarios (nombre, email)" />
-                <select id="userSort" class="sort-select">
-                    <option value="id">Orden: ID</option>
-                    <option value="nombre">Orden: Nombre</option>
-                    <option value="email">Orden: Email</option>
-                    <option value="created">Orden: Creado</option>
-                </select>
             </div>
         </div>
+    </main>
 
-        <table class="admin-table" style="margin-top:12px">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Nombre</th>
-                    <th>Apellidos</th>
-                    <th>Email</th>
-                    <th>Fecha nacimiento</th>
-                    <th>Created At</th>
-                    <th>Rol</th>
-                    <th class="text-center">Acciones</th>
-                </tr>
-            </thead>
-            <tbody>
-                <%
-                    List<Map<String,Object>> users = (List<Map<String,Object>>) request.getAttribute("users");
-                    if (users != null) {
-                        for (Map<String,Object> u : users) {
-                %>
-                <tr>
-                    <td><%= u.get("id") %></td>
-                    <td><strong><%= u.get("nombre") %></strong></td>
-                    <td><%= u.get("apellidos") %></td>
-                    <td><%= u.get("email") %></td>
-                    <td><%= u.get("fecha_nacimiento") %></td>
-                    <td><%= u.get("created_at")!=null?u.get("created_at") : "" %></td>
-                    <td><span style="padding:6px 8px;border-radius:6px;background:#f3f4f6;color:#111;font-weight:600;font-size:0.9rem"><%= (u.get("rol")!=null?u.get("rol"):(u.get("is_admin")!=null && (Boolean)u.get("is_admin")?"admin":"user")) %></span></td>
-                    <td class="text-center">
-                        <div class="action-forms">
-                            <a class="action-btn btn-edit small-btn" href="<%= request.getContextPath() %>/admin/users?edit=<%= u.get("id") %>">Editar</a>
-                            <form method="post" action="<%= request.getContextPath() %>/admin/users" onsubmit="return confirm('Eliminar usuario?');">
-                                <input type="hidden" name="action" value="delete" />
-                                <input type="hidden" name="id" value="<%= u.get("id") %>" />
-                                <button class="action-btn btn-danger small-btn" type="submit">Eliminar</button>
-                            </form>
-                            <form method="post" action="<%= request.getContextPath() %>/admin/users">
-                                <input type="hidden" name="action" value="toggleAdmin" />
-                                <input type="hidden" name="id" value="<%= u.get("id") %>" />
-                                <button class="action-btn btn-toggle small-btn" type="submit" title="<%= ("admin".equals(u.get("rol")) || (u.get("is_admin")!=null && (Boolean)u.get("is_admin"))) ? "Desactivar" : "Activar" %>">
-                                    <span class="label"><%= ("admin".equals(u.get("rol")) || (u.get("is_admin")!=null && (Boolean)u.get("is_admin"))) ? "Desactivar" : "Activar" %></span>
-                                </button>
-                            </form>
-                        </div>
-                    </td>
-                </tr>
-                <%
-                        }
-                    }
-                %>
-            </tbody>
-        </table>
+    <script>window.APP_CTX = '<%= ctx %>';</script>
+    <!-- Edit user modal -->
+    <div id="editUserModal" class="modal-backdrop" style="display:none;align-items:center;justify-content:center;z-index:1200">
+        <div class="modal" role="dialog" aria-modal="true" style="width:420px;max-width:calc(100% - 32px);">
+            <h3>Editar Usuario</h3>
+            <div class="form-row">
+                <label for="euNombre">Nombre</label>
+                <input id="euNombre" type="text" />
+            </div>
+            <div class="form-row">
+                <label for="euEmail">Email</label>
+                <input id="euEmail" type="email" />
+            </div>
+            <div class="form-row">
+                <label for="euRol">Rol</label>
+                <select id="euRol">
+                    <option value="admin">Administrador</option>
+                    <option value="operario">Operario</option>
+                    <option value="supervisor">Supervisor</option>
+                    <option value="cliente">Cliente</option>
+                </select>
+            </div>
+            <div class="form-row">
+                <label for="euPassword">Contraseña (dejar en blanco para no cambiar)</label>
+                <input id="euPassword" type="password" />
+            </div>
+            <div class="actions">
+                <button id="euCancel" class="btn-ghost">Cancelar</button>
+                <button id="euSave" class="btn-save">Guardar</button>
+            </div>
+        </div>
     </div>
-  </div>
-</div>
-
-<script>
-    (function(){
-        const input = document.getElementById('userSearch');
-        const sort = document.getElementById('userSort');
-        const table = document.querySelector('.admin-table');
-        if (!table) return;
-        const tbody = table.querySelector('tbody');
-        const rows = Array.from(tbody.querySelectorAll('tr'));
-
-        function normalize(t){ return (t||'').toString().toLowerCase(); }
-
-        if (input) input.addEventListener('input', function(){
-            const q = normalize(this.value);
-            rows.forEach(r=>{
-                const cells = r.querySelectorAll('td');
-                const hay = normalize(cells[1].textContent).includes(q) || normalize(cells[3].textContent).includes(q);
-                r.style.display = hay ? '' : 'none';
-            });
-        });
-
-        if (sort) sort.addEventListener('change', function(){
-            const v = this.value;
-            const sorted = rows.slice().sort((a,b)=>{
-                if (v==='id') return Number(a.children[0].textContent) - Number(b.children[0].textContent);
-                if (v==='nombre') return a.children[1].textContent.localeCompare(b.children[1].textContent);
-                if (v==='email') return a.children[3].textContent.localeCompare(b.children[3].textContent);
-                if (v==='created') return new Date(a.children[5].textContent) - new Date(b.children[5].textContent);
-                return 0;
-            });
-            sorted.forEach(r=> tbody.appendChild(r));
-        });
-    })();
-</script>
-
+    <!-- Create user modal -->
+    <div id="createUserModal" class="modal-backdrop" style="display:none;align-items:center;justify-content:center;z-index:1200">
+        <div class="modal" role="dialog" aria-modal="true" style="width:420px;max-width:calc(100% - 32px);">
+            <h3>Nuevo Usuario</h3>
+            <div class="form-row">
+                <label for="cuNombre">Nombre</label>
+                <input id="cuNombre" type="text" />
+            </div>
+            <div class="form-row">
+                <label for="cuEmail">Email</label>
+                <input id="cuEmail" type="email" />
+            </div>
+            <div class="form-row">
+                <label for="cuRol">Rol</label>
+                <select id="cuRol">
+                    <option value="admin">Administrador</option>
+                    <option value="operario">Operario</option>
+                    <option value="supervisor">Supervisor</option>
+                    <option value="cliente">Cliente</option>
+                </select>
+            </div>
+            <div class="form-row">
+                <label for="cuPassword">Contraseña</label>
+                <input id="cuPassword" type="password" />
+            </div>
+            <div class="actions">
+                <button id="cuCancel" class="btn-ghost">Cancelar</button>
+                <button id="cuCreate" class="btn-save">Crear</button>
+            </div>
+        </div>
+    </div>
+    <script src="<%= ctx %>/js/admin-users.js"></script>
 </div>
 </body>
 </html>
