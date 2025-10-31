@@ -1,44 +1,25 @@
 package tienda.supernova.servlets;
 
-
-
 import jakarta.servlet.ServletException;
-
 import jakarta.servlet.annotation.WebServlet;
-
 import jakarta.servlet.http.HttpServlet;
-
 import jakarta.servlet.http.HttpServletRequest;
-
 import jakarta.servlet.http.HttpServletResponse;
-
 import java.io.IOException;
 
-
-
 @WebServlet("/admin/dashboard")
-
 public class AdminDashboardServlet extends HttpServlet {
-
-
 
     @Override
 
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 
-
         int totalUsers = 0;
-
         int totalProducts = 0;
-
         int pendingOrders = 0;
-
         try (java.sql.Connection con = tienda.supernova.db.DBConnection.getConnection()) {
-
             try (java.sql.PreparedStatement ps = con.prepareStatement("SELECT COUNT(*) AS cnt FROM usuarios")) {
-
                 try (java.sql.ResultSet rs = ps.executeQuery()) {
-
                     if (rs.next()) totalUsers = rs.getInt("cnt");
 
                 }

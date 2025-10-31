@@ -41,7 +41,6 @@ public class DashboardDataServlet extends HttpServlet {
             return;
         }
 
-        // Build JSON
         StringBuilder sb = new StringBuilder();
         sb.append('{');
         sb.append("\"labels\":[");
