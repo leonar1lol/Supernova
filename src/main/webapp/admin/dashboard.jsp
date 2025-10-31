@@ -46,13 +46,16 @@
     </div>
 
     <div class="actions-grid">
-        <a class="action-card" href="<%= ctx %>/admin/products"><div style="width:42px;height:42px;border-radius:8px;background:#f9a825;margin-right:10px"></div><div>Gestionar Productos</div></a>
+        <a class="action-card" href="<%= ctx %>/admin/orders.jsp"><div style="width:42px;height:42px;border-radius:8px;background:#6a1b9a;margin-right:10px"></div><div>Gestión de Pedidos</div></a>
+        <a class="action-card" href="<%= ctx %>/admin/route-optimization.jsp"><div style="width:42px;height:42px;border-radius:8px;background:#f57c00;margin-right:10px"></div><div>Optimización de Ruta</div></a>
+        <a class="action-card" href="<%= ctx %>/admin/product-validation.jsp"><div style="width:42px;height:42px;border-radius:8px;background:#00796b;margin-right:10px"></div><div>Validación de Productos</div></a>
+        <a class="action-card" href="<%= ctx %>/admin/notifications.jsp"><div style="width:42px;height:42px;border-radius:8px;background:#455a64;margin-right:10px"></div><div>Notificaciones</div></a>
         <% 
             jakarta.servlet.http.HttpSession _s = request.getSession(false);
             String _role = _s != null ? (String) _s.getAttribute("role") : null;
             if (_role != null && (_role.equalsIgnoreCase("admin") || _role.equalsIgnoreCase("supervisor"))) {
         %>
-        <a class="action-card" href="<%= ctx %>/admin/users"><div style="width:42px;height:42px;border-radius:8px;background:#1976d2;margin-right:10px"></div><div>Gestionar Usuarios</div></a>
+        <a class="action-card" href="<%= ctx %>/admin/users.jsp"><div style="width:42px;height:42px;border-radius:8px;background:#1976d2;margin-right:10px"></div><div>Gestionar Usuarios</div></a>
         <% } %>
     </div>
         </div>
